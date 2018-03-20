@@ -24,7 +24,7 @@ X_test = X[random_indices[-n_testing_samples:]]
 Y_test = Y[random_indices[-n_testing_samples:]]
 
 #DecisionTree Classifier  
-model = tree.DecisionTreeClassifier()
+model = tree.DecisionTreeClassifier(max_depth=3)
 model.fit(X_train,Y_train)
 
 #predict for the entire mesh to find the regions for each class in the feature space
