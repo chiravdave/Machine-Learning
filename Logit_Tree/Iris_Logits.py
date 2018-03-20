@@ -35,6 +35,9 @@ full_X = np.concatenate((X_class0,X_class1),axis=0)
 full_Y = np.concatenate((Y_class0,Y_class1),axis=0)
 model.fit(full_X,full_Y)
 
+#(Visualization code taken from: http://scikit-learn.org/stable/auto_examples/linear_model/plot_iris_logistic.html)
+# Plot the decision boundary. For that, we will assign a color to each
+# point in the mesh [x_min, m_max]x[y_min, y_max].
 h = .02  # step size in the mesh
 x_min, x_max = full_X[:, 0].min() - .5, full_X[:, 0].max() + .5
 y_min, y_max = full_X[:, 1].min() - .5, full_X[:, 1].max() + .5
@@ -57,7 +60,7 @@ for i in range(len(testing)):
         testing_correct+= 1
 correct_testing_percentage = 100*(testing_correct/len(Y_test))
 print 'test misclassification percentage =', correct_testing_percentage, '%'
-'''
+
 # Put the result into a color plot
 Z = Z.reshape(xx.shape)
 plt.figure()
@@ -71,4 +74,4 @@ plt.ylabel('Sepal width')
 plt.title('Fig 4: Visualization of decision boundary')
 plt.xlim(xx.min(), xx.max())
 plt.ylim(yy.min(), yy.max())
-plt.show()'''
+plt.show()
