@@ -41,7 +41,7 @@ class LinearModel:
     plt.show()
 
 def Main():
-  dataset = np.load('linRegData.npy')
+  dataset = np.load('linRegData.npy')   #100 data points
   x, y = np.hsplit(dataset, 2)
   myModel = LinearModel(0.001)
   myModel.train(x.T,y.T,20)
