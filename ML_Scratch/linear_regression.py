@@ -4,49 +4,46 @@ import matplotlib.pyplot as plt
 class LinearModel:
   def __init__(self, learning_rate):
     self.learning_rate = learning_rate
-
-  def train(self, x, y, epochs):
-    self.losses = []
-    self.epochs = []
     self.W1 = np.random.rand(1,1)     #Weight matrix
-    self.W0 = np.random.rand(1,1)          #Bias
+    self.W0 = np.random.rand(1,1)     #Bias
+
+  def train(self, X, Y, iterations):
+    samples = X.size
     count = 1
-    while(count <= epochs):
-      prediction = np.dot(self.W1,x) + self.W0  # Y = W1*X + W0
-      loss = prediction - y
-      square_loss = np.sum(np.square(loss))
-      dprediction = np.sum(loss, keepdims=True)/prediction.size  #dL/dy
-      dW1 = np.sum(dprediction *  x.T, keepdims=True) 
-      dW0 = dprediction * np.ones((1,1))
+    losses = []
+    epochs = []
+    while(count <= iterations):
+      prediction = np.dot(self.W1,X) + self.W0  # Y = W1*X + W0
+      dprediction = prediction - Y              #dL/dY
+      square_loss = np.sum(np.square(dprediction))
+      dW1 = np.dot(dprediction, X.T)/samples  #dL/dW1 = dL/dY*d(X.T)  
+      dW0 = np.sum(dprediction, keepdims=True)/ samples              #dL/dW0 = dL/dY
       self.W1 = self.W1 - self.learning_rate * dW1
       self.W0 = self.W0 - self.learning_rate * dW0
       count = count + 1
-      self.epochs.append(count)
-      self.losses.append(square_loss)
-
-  def showGraph(self):
+      epochs.append(count)
+      losses.append(square_loss)
+    plt.scatter(epochs, losses)
     plt.ylabel('Loss')
     plt.xlabel('Epochs')
-    plt.scatter(self.epochs, self.losses)
-    plt.title('Loss Curve')
+    plt.title('Training')
     plt.show()
 
-  def test(self, x, y):
-    prediction = np.dot(self.W1,x) + self.W0
-    plt.ylabel('Output')
+  def test(self, X, Y):
+    prediction = np.dot(self.W1,X) + self.W0
+    plt.plot(X.flatten(), Y.flatten())
+    plt.plot(X.flatten(), prediction.flatten())
+    plt.ylabel('Prediction')
     plt.xlabel('Input')
-    plt.plot(x.flatten(), prediction.flatten())
-    plt.scatter(x, y)
-    plt.title('Line fitting')
+    plt.title('Testing')
     plt.show()
 
 def Main():
-  dataset = np.load('linRegData.npy')   #100 data points
-  x, y = np.hsplit(dataset, 2)
+  X = np.linspace(-np.pi,np.pi,200).reshape(-1,200)
+  Y = np.sin(X)     
   myModel = LinearModel(0.001)
-  myModel.train(x.T,y.T,20)
-  myModel.showGraph()
-  myModel.test(x.T,y.T)
+  myModel.train(X,Y,40)
+  myModel.test(X,Y)
 
 if __name__ == '__main__':
   Main()
