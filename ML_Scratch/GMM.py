@@ -18,31 +18,29 @@ class GMM():
         cov_inv = np.linalg.inv(cov)
         #Probability distribution of every data point over all clusters
         self.prob = np.zeros((self.data.shape[0],2))
-        stopping_weight = 0
-        while(self.models['weight1'] != stopping_weight):
+        old_weight1 = 0
+        while(abs(self.models['weight1'] - old_weight1)>0.01):
             #E-Step
             for j in range(self.data.shape[0]):
-                data_prob1 = np.exp(-0.5*np.dot(np.dot((self.data[j] - self.models['mean1']),cov_inv),(self.data[j] - self.models['mean1']).T))/np.sqrt(2*np.pi*cov_det)
-                data_prob2 = np.exp(-0.5*np.dot(np.dot((self.data[j] - self.models['mean2']),cov_inv),(self.data[j] - self.models['mean2']).T))/np.sqrt(2*np.pi*cov_det)
-                data_prob_sum = data_prob1 + data_prob2
-                self.prob[j][0] = data_prob2 / data_prob_sum
-                self.prob[j][1] = 1 - self.prob[j][0]
+                self.prob[j][0] = (np.exp(-0.5*np.dot(np.dot((self.data[j] - self.models['mean1']),cov_inv),(self.data[j] - self.models['mean1']).T))/np.sqrt(2*np.pi*cov_det))*self.models['weight1']
+                self.prob[j][1] = (np.exp(-0.5*np.dot(np.dot((self.data[j] - self.models['mean2']),cov_inv),(self.data[j] - self.models['mean2']).T))/np.sqrt(2*np.pi*cov_det))*self.models['weight2']
+            self.prob = self.prob/np.sum(self.prob, axis=1, keepdims=True)
             #M-Step
-            stopping_weight = self.models['weight1']
+            old_weight1 = self.models['weight1']
+            self.models['weight1'] = 0
+            self.models['mean1'] = np.zeros((1,self.data.shape[1]))
+            self.models['weight2'] = 0
+            self.models['mean2'] = np.zeros((1,self.data.shape[1]))
             expectation1 = 0
-            mean1 = np.zeros((1,13))
             expectation2 = 0
-            mean2 = np.zeros((1,13))
             for i in range(self.data.shape[0]):
-                dummy_expect1 = self.prob[i][0]*self.data[i]
-                mean1 = mean1 + dummy_expect1
+                self.models['mean1'] = self.models['mean1'] + self.prob[i][0]*self.data[i]
                 expectation1 = expectation1 + self.prob[i][0]
-                dummy_expect2 = self.prob[i][1]*self.data[i]
-                mean2 = mean2 + dummy_expect2
+                self.models['mean2'] = self.models['mean2'] + self.prob[i][1]*self.data[i]
                 expectation2 = expectation2 + self.prob[i][1] 	 
-            self.models['mean1'] = mean1/expectation1
+            self.models['mean1'] = self.models['mean1']/expectation1
             self.models['weight1'] = expectation1/self.data.shape[0]
-            self.models['mean2'] = mean2/expectation2
+            self.models['mean2'] = self.models['mean2']/expectation2
             self.models['weight2'] = expectation2/self.data.shape[0]
 
     def plotGMM(self):
@@ -66,8 +64,8 @@ class GMM():
                 
 def Main():
     data = pd.read_csv("./audioData.csv")
-    numpy_array = data.values
-    model = GMM(numpy_array)
+    features = data.values
+    model = GMM(features)
     model.fit()	
     model.plotGMM()
 
